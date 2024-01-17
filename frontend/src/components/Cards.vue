@@ -12,9 +12,11 @@ export default {
         current_page: 1,
         per_page: 10,
         total: 0,
-     },
+      },
       editDialogVisible: false,
       addNewDialogVisible: false,
+      editErrorMessage: '',
+      addNewErrorMessage: '',
       editForm: {
         card_number: '',
         pin: '',
@@ -69,7 +71,6 @@ export default {
       this.editDialogVisible = true;
     },
     async submitEditForm() {
-      console.log('Token:', this.$store.state.token);
       const headers = {
         Authorization: `Bearer ${this.$store.state.token}`,
       };
@@ -80,26 +81,34 @@ export default {
         activation_date: formattedActivationDate,
         expiry_date: formattedExpiryDate,
       };
-      this.$refs.editForm.validate((valid) => {
+      await this.$refs.editForm.validate((valid) => {
         this.isEditFormValid = valid;
       });
       if (!this.isEditFormValid) {
         return;
       }
-      axios.put(`/api/cards/${this.editForm.id}`, dataToSend, {headers})
-          .then(response => {
-            this.editDialogVisible = false;
-            this.loadData();
-            this.resetEditForm();
-          })
-          .catch(error => console.error(error));
+      try {
+        axios.put(`/api/cards/${this.editForm.id}`, dataToSend, {headers})
+            .then(response => {
+              this.editDialogVisible = false;
+              this.loadData();
+              this.resetEditForm();
+            })
+      } catch (error) {
+        this.editErrorMessage = 'Update failed: ' + error.response.data.message;
+      }
     },
     handleDelete(index, row) {
-      axios.delete(`/api/cards/${row.id}`, {headers})
-          .then(response => {
-            this.loadData();
-          })
-          .catch(error => console.error(error));
+      const headers = {
+        Authorization: `Bearer ${this.$store.state.token}`,
+      };
+      try {
+        axios.delete(`/api/cards/${row.id}`, {headers})
+            .then(response => {
+              this.loadData();
+            })
+      } catch (error) {
+      }
     },
     submitAddNewForm() {
       const headers = {
@@ -118,13 +127,16 @@ export default {
       if (!this.isAddNewFormValid) {
         return;
       }
-      axios.post('/api/cards', dataToSend, {headers})
-          .then(response => {
-            this.addNewDialogVisible = false;
-            this.loadData();
-            this.resetAddNewForm();
-          })
-          .catch(error => console.error(error));
+      try {
+        axios.post('/api/cards', dataToSend, {headers})
+            .then(response => {
+              this.addNewDialogVisible = false;
+              this.loadData();
+              this.resetAddNewForm();
+            })
+      } catch (error) {
+        this.addNewErrorMessage = 'Update failed: ' + error.response.data.message;
+      }
     },
     resetEditForm() {
       this.$refs.editForm.resetFields();
@@ -154,7 +166,8 @@ export default {
       this.loadData(val);
     }
   }
-};
+}
+;
 </script>
 
 <template>
@@ -182,6 +195,7 @@ export default {
     </el-pagination>
 
     <el-dialog v-model="editDialogVisible" title="Edit Form">
+      <div v-if="editErrorMessage" style="color: red;">{{ editErrorMessage }}</div>
       <el-form :model="editForm" ref="editForm" :rules="editRules">
         <el-form-item label="Card number" prop="card_number">
           <el-input maxlength="20" type="text" v-model="editForm.card_number"></el-input>
@@ -207,6 +221,7 @@ export default {
     </el-dialog>
 
     <el-dialog v-model="addNewDialogVisible" title="Add New Card">
+      <div v-if="addNewErrorMessage" style="color: red;">{{ addNewErrorMessage }}</div>
       <el-form :model="addNewForm" ref="addNewForm" :rules="editRules">
         <el-form-item label="Card number" prop="card_number">
           <el-input type="number" v-model="addNewForm.card_number"></el-input>
