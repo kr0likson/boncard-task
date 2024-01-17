@@ -59,6 +59,7 @@ services:
       MYSQL_ROOT_PASSWORD: rootpasswd2341
     volumes:
       - database_data:/var/lib/mysql
+      - ./dump.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - app-network
 volumes:
