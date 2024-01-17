@@ -15,6 +15,7 @@
       </div>
     </div>
     <el-dialog v-model="loginDialogVisible" title="Login Form">
+      <div v-if="loginErrorMessage" style="color: red;">{{ loginErrorMessage }}</div>
       <el-form
           label-position="top"
           label-width="100px"
@@ -34,6 +35,7 @@
     </el-dialog>
 
     <el-dialog v-model="registerDialogVisible" title="Register form">
+      <div v-if="registerErrorMessage" style="color: red;">{{ registerErrorMessage }}</div>
       <el-form
           label-position="top"
           label-width="100px"
@@ -76,6 +78,8 @@ export default {
       },
       loginDialogVisible: false,
       registerDialogVisible: false,
+      loginErrorMessage: '',
+      registerErrorMessage: ''
     };
   },
   computed: {
@@ -87,25 +91,26 @@ export default {
     async register() {
       try {
         const response = await this.$store.dispatch('register', this.userRegisterData);
-        console.log('Registration successful:', response);
-
+        console.log('Registration successful');
         await this.loginUser();
         this.registerDialogVisible = false;
       } catch (error) {
-        console.error('Registration failed:', error);
+        this.registerErrorMessage = 'Registration failed: ' + error.response.data.message;
       }
     },
     async loginUser() {
       try {
         const response = await this.$store.dispatch('login', this.userLoginData);
-        console.log('Logged in:', response);
         this.loginDialogVisible = false;
+        console.log('Login successful');
       } catch (error) {
-        console.error('Login failed:', error.response.data);
+        this.loginErrorMessage = 'Login failed: ' + error.response.data.message;
       }
     },
-    logout() {
+    async logout() {
       this.$store.dispatch('logout');
+      console.log('Logged out');
+
     },
   },
 };
