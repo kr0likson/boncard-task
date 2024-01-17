@@ -5,7 +5,7 @@ export default createStore({
     state: {
         isLoggedIn: false,
         user: null,
-        token: null
+        token: null,
     },
     mutations: {
         setLoggedIn(state, payload) {
@@ -20,30 +20,25 @@ export default createStore({
     },
     actions: {
         async login({commit}, userData) {
-            try {
-                const response = await axios.post('/api/login', userData);
-                commit('setLoggedIn', true);
-                commit('setUser', response.data.user);
-                commit('setToken', response.data.token);
-                return response.data;
-            } catch (error) {
-                console.error('Login failed:', error.response.data);
-                throw error;
-            }
+            const response = await axios.post('/api/login', userData);
+            commit('setLoggedIn', true);
+            commit('setUser', response.data.user);
+            commit('setToken', response.data.token);
+            return response.data;
         },
-        async logout({commit}, userData) {
-            const response = await  axios.post('/api/logout', userData);
+        async logout({commit, state}) {
+            const headers = {
+                Authorization: `Bearer ${state.token}`,
+            };
+            const response = await axios.post('/api/logout', {user: state.user}, {headers});
             commit('setLoggedIn', false);
             commit('setUser', null);
+            commit('setToken', null);
         },
         async register({commit}, userData) {
-            try {
-                const response = await axios.post('/api/register', userData);
-                console.log('Registration successful:', response);
-                return response.data;
-            } catch (error) {
-                console.error('Registration failed:', error.response || error);
-            }
+            const response = await axios.post('/api/register', userData);
+            console.log('Registration successful:', response);
+            return response.data;
         },
     }
 });
