@@ -2,8 +2,8 @@
     FROM mysql:8.2.0
 
     # Copy the SQL initialization script into the container
-    COPY dump.sql /docker-entrypoint-initdb.d/
-    COPY my.cnf /etc/mysql/
+    COPY ./dump.sql /docker-entrypoint-initdb.d/init.sql
+    COPY ./my.cnf /etc/mysql/my.cnf
     RUN chmod 644 /etc/mysql/my.cnf
 
     # Expose port 3306 for MySQL connections

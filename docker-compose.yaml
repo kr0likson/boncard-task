@@ -40,6 +40,7 @@ services:
     depends_on:
       - backend
       - frontend
+      - database
     build:
       context: ./backend/nginx
     container_name: webserver
@@ -56,13 +57,13 @@ services:
     volumes:
       - database_data:/var/lib/mysql/
       - ./mysql/my.cnf:/etc/mysql/my.cnf
-      - ./mysql/dump.sql:/docker-entrypoint-initdb.d/dump.sql
+      - ./mysql/dump.sql:/docker-entrypoint-initdb.d/init.sql
     environment:
       MYSQL_DATABASE: boncard
       MYSQL_USER: boncarduser
       MYSQL_PASSWORD: passwd2341
       MYSQL_ROOT_PASSWORD: rootpasswd2341
-      MYSQL_INIT_FILE: /docker-entrypoint-initdb.d/dump.sql
+    command: --init-file /docker-entrypoint-initdb.d/init.sql
     networks:
       - app-network
 volumes:
