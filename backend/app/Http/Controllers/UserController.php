@@ -32,11 +32,11 @@ class UserController extends Controller
         if (Auth::attempt(['email' => request('email'), 'password' => request('password')])) {
             $user = User::find(Auth::user()->id);
 
-            $user_token['token'] = $user->createToken('appToken')->accessToken;
+            $token = $user->createToken('appToken')->plainTextToken;
 
             return response()->json([
                 'success' => true,
-                'token' => $user_token,
+                'token' => $token,
                 'user' => $user,
             ]);
         } else {
@@ -67,8 +67,19 @@ class UserController extends Controller
         unset($userData['password_confirmation']);
         $user = User::factory()->make($userData);
         $user->save();
-        $token = $user->createToken('BoncardToken')->accessToken;
+        $token = $user->createToken('BoncardToken')->plainTextToken;
         $response = ['token' => $token];
-        return response($response, 200);
+        return response()->json($response);
     }
+
+    public function logout(Request $request)
+    {
+        $request->user()->tokens()->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'User logged out successfully.',
+        ]);
+    }
+
 }
