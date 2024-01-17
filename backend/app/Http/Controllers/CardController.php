@@ -16,7 +16,7 @@ class CardController extends Controller
      */
     public function index()
     {
-        $cards = Card::all();
+        $cards = Card::paginate(request('perPage', 10));
         return response()->json($cards);
     }
 
