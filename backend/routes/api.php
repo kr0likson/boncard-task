@@ -21,6 +21,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 Route::post('/register', [UserController::class, 'register']);
 Route::post('/login', [UserController::class, 'login']);
+Route::post('/logout', [UserController::class, 'logout']);
+
 Route::middleware('auth:sanctum')->group(function () {
     Route::resource('cards', CardController::class)->except(['create', 'index', 'edit']);
 });
