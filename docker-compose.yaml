@@ -51,20 +51,23 @@ services:
       - app-network
 
   database:
-    image: mysql:latest
+    build:
+      context: ./mysql
+    volumes:
+      - database_data:/var/lib/mysql/
+      - ./mysql/my.cnf:/etc/mysql/my.cnf
+      - ./mysql/dump.sql:/docker-entrypoint-initdb.d/dump.sql
     environment:
       MYSQL_DATABASE: boncard
       MYSQL_USER: boncarduser
       MYSQL_PASSWORD: passwd2341
       MYSQL_ROOT_PASSWORD: rootpasswd2341
-    volumes:
-      - database_data:/var/lib/mysql
-      - ./dump.sql:/docker-entrypoint-initdb.d/init.sql
+      MYSQL_INIT_FILE: /docker-entrypoint-initdb.d/dump.sql
     networks:
       - app-network
 volumes:
   database_data:
-
+    driver: local
 #Docker Networks
 networks:
   app-network:
