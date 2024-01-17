@@ -5,6 +5,7 @@ export default createStore({
     state: {
         isLoggedIn: false,
         user: null,
+        token: null
     },
     mutations: {
         setLoggedIn(state, payload) {
@@ -13,6 +14,9 @@ export default createStore({
         setUser(state, payload) {
             state.user = payload;
         },
+        setToken(state, payload) {
+            state.token = payload;
+        },
     },
     actions: {
         async login({commit}, userData) {
@@ -20,6 +24,7 @@ export default createStore({
                 const response = await axios.post('/api/login', userData);
                 commit('setLoggedIn', true);
                 commit('setUser', response.data.user);
+                commit('setToken', response.data.token);
                 return response.data;
             } catch (error) {
                 console.error('Login failed:', error.response.data);
