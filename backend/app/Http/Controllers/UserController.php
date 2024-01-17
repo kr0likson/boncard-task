@@ -15,6 +15,7 @@ class UserController extends Controller
     {
         $this->middleware('auth:sanctum', ['except' => ['login', 'register']]);
     }
+
     public function login(Request $request)
     {
         try {
@@ -24,9 +25,9 @@ class UserController extends Controller
             ]);
         } catch (ValidationException) {
             return response()->json([
-                'success'=> false,
+                'success' => false,
                 'message' => 'Invalid data'
-            ],422);
+            ], 422);
         }
 
         if (Auth::attempt(['email' => request('email'), 'password' => request('password')])) {
@@ -57,11 +58,11 @@ class UserController extends Controller
             ]);
         } catch (ValidationException $exception) {
             return response()->json([
-                'success'=> false,
+                'success' => false,
                 'message' => 'Invalid data'
             ], 422);
         }
-        $request['password']=Hash::make($request['password']);
+        $request['password'] = Hash::make($request['password']);
         $request['remember_token'] = Str::random(10);
         $userData = $request->toArray();
         unset($userData['password_confirmation']);
@@ -74,8 +75,17 @@ class UserController extends Controller
 
     public function logout(Request $request)
     {
-        $request->user()->tokens()->delete();
-
+        try {
+            $user = Auth::getUser();
+            if ($user) {
+                $user->tokens()->delete();
+            }
+        } catch (\Exception $exception) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User logout failed',
+            ]);
+        }
         return response()->json([
             'success' => true,
             'message' => 'User logged out successfully.',
